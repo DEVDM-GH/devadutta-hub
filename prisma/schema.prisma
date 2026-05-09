@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model HealthEntry {
+  id          Int      @id @default(autoincrement())
+  date        String
+  weightKg    Float?
+  calories    Int?
+  waterL      Float?
+  sleepHrs    Float?
+  workoutDone Boolean  @default(false)
+  notes       String?
+  createdAt   DateTime @default(now())
+}
+
+model SavedIdea {
+  id        Int      @id @default(autoincrement())
+  category  String
+  title     String
+  content   String
+  tags      String   @default("")
+  pinned    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

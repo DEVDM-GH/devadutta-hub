@@ -1,0 +1,122 @@
+[
+  {
+    "category": "career",
+    "title": "Position Yourself as an AI-QA Hybrid Engineer",
+    "content": "Your combination of SDET depth + MCP/Claude tooling is rare. Start calling yourself an 'AI-QA Engineer' or 'AI Infrastructure Engineer' on LinkedIn. Update your headline to: 'Senior SDET | AI Tools Builder | MCP + Claude | Fintech'. This positions you in a new category where there's almost no competition and very high demand in 2026.",
+    "tags": "personal-brand,LinkedIn,positioning,career"
+  },
+  {
+    "category": "career",
+    "title": "Target Developer Tools & AI Infrastructure Startups",
+    "content": "Companies like Baseten, Modal, Retool, Linear, and Indian AI startups (Sarvam, Krutrim, Spinach AI) are hiring engineers who understand both quality and AI tooling. Your RCA machine is a direct match for their internal engineering problems. Apply with your GitHub as the primary artifact — not your CV.",
+    "tags": "job-search,AI-startups,developer-tools,salary"
+  },
+  {
+    "category": "career",
+    "title": "Write One LinkedIn Article Per Month About Your RCA Machine",
+    "content": "Your RCA machine is genuinely novel — nobody else is writing about Claude + Grafana MCP + Atlassian MCP in production. Write a 3-part LinkedIn series: Part 1 (the problem), Part 2 (the architecture), Part 3 (lessons learned). This alone could get you inbound from startups and trigger salary conversations at your current company.",
+    "tags": "content-creation,personal-brand,LinkedIn,visibility"
+  },
+  {
+    "category": "career",
+    "title": "Pursue a Tech Lead Role at Niyo Before Jumping Ship",
+    "content": "You're already doing Tech Lead work: QA CoE setup, SDLC/STLC alignment, cross-team strategy, AI tooling adoption. Request a title and comp review with concrete evidence — dashboard adoption numbers, framework usage metrics, AI tools impact. An internal promotion to Lead is 3-6 months away if you frame it correctly.",
+    "tags": "promotion,negotiation,internal-growth,leadership"
+  },
+  {
+    "category": "career",
+    "title": "Get a Certified Scrum Product Owner (CSPO) Certificate",
+    "content": "You already have CSM. Adding CSPO bridges your QA expertise into product thinking — a critical step toward Tech Lead/PM hybrid roles that pay 40-60 LPA. It also makes you more credible when talking to product teams about shift-left testing and AI tool adoption. StarAgile or Scrum Alliance both offer it online.",
+    "tags": "certification,scrum,product,career-growth"
+  },
+  {
+    "category": "career",
+    "title": "Build in Public: GitHub + Blog for Your AI Tools",
+    "content": "Open-source a sanitized version of your CV enrichment tool or a smaller utility (JIRA test case generator). Add a blog at devadutta.dev (or use Hashnode/Substack). 3 posts about AI + quality engineering will get you more job offers than 30 applications. The MCP community specifically is looking for practitioners, not theorists.",
+    "tags": "open-source,blogging,personal-brand,community"
+  },
+  {
+    "category": "project",
+    "title": "Test Intelligence Platform — AI-Powered Test Prioritization",
+    "content": "Build a Next.js dashboard that ingests your Postman/Newman test results + deployment data and uses an LLM to recommend which test suites to run based on code diff, risk, and historical failure patterns. This is a product gap in fintech QA teams. You can build an MVP in 3 weeks and demo it at your company or open-source it.",
+    "tags": "AI,testing,MCP,product,portfolio"
+  },
+  {
+    "category": "project",
+    "title": "Public MCP Registry & Templates for QA Teams",
+    "content": "Create a GitHub repo with 10-15 pre-built MCP server configurations for common QA tools: JIRA, GitHub, Grafana, Postman, Datadog. Each template comes with prompts and use-case documentation. This would be one of the first comprehensive MCP+QA resource repositories and would build massive community credibility.",
+    "tags": "MCP,open-source,community,templates,QA"
+  },
+  {
+    "category": "project",
+    "title": "Finish CV Enrichment Tool + Ship It",
+    "content": "Complete the Google API integration, add a simple landing page, and put it behind a Stripe payment ($9/resume). Post it on ProductHunt, LinkedIn, and Reddit r/cscareerquestions. Even 50 users at $9 = Rs 37,000. The real value is the portfolio proof and inbound job leads from engineers who use it and want to hire you.",
+    "tags": "product,SaaS,Stripe,monetization,AI"
+  },
+  {
+    "category": "project",
+    "title": "Synthetic Monitoring Agent with MCP + Alerting",
+    "content": "Build a lightweight agent that runs synthetic API health checks, detects anomalies using Claude, and sends context-aware alerts to Google Chat with suggested RCA. You've already built parts of this at Niyo — extract it into a standalone open-source project. This solves a real problem for every SRE/QA team.",
+    "tags": "monitoring,MCP,Claude,agent,open-source"
+  },
+  {
+    "category": "project",
+    "title": "Personal Finance Dashboard for Fintech Employees",
+    "content": "You work in fintech and understand financial products (FD, lending, credit). Build a personal finance tracker with AI-powered insights — expense categorization, investment suggestions, EMI tracking — using Next.js + SQLite + free Gemini API. Use it yourself first. This doubles as a portfolio piece for fintech PM/product roles.",
+    "tags": "fintech,personal-project,AI,product"
+  },
+  {
+    "category": "project",
+    "title": "Cursor Workspace Bootstrapper for QA Teams",
+    "content": "A CLI tool + Cursor ruleset package that sets up a complete AI-assisted QA workspace: pre-loaded prompts, MCP configs for JIRA/GitHub/Grafana, test generation templates, and automated RCA triggers. Sell it as a template or open-source it. QA leads who discover Cursor need exactly this — a turnkey starting point.",
+    "tags": "Cursor,CLI,QA,tooling,product"
+  },
+  {
+    "category": "learning",
+    "title": "Complete the Anthropic Prompt Engineering Course",
+    "content": "Anthropic's free prompt engineering documentation and courses are the definitive resource for working with Claude effectively. Spending 8-10 hours going through it systematically will make your RCA prompts, CV enrichment tool, and any future AI products 3x more effective. This is a direct skill investment for your existing projects.",
+    "tags": "Claude,prompt-engineering,Anthropic,AI"
+  },
+  {
+    "category": "learning",
+    "title": "Learn LangGraph or CrewAI for Multi-Agent Systems",
+    "content": "Your RCA machine is already a proto-agent. Learning LangGraph (Python) or CrewAI will let you build proper multi-agent pipelines where agents specialize (JIRA agent, Grafana agent, code analysis agent) and collaborate with memory and handoffs. This is the skill that turns your current tools from prototypes into production-grade AI systems. Invest 20-30 hours on their official tutorials.",
+    "tags": "LangGraph,multi-agent,Python,AI-engineering"
+  },
+  {
+    "category": "learning",
+    "title": "AWS Certified Developer Associate",
+    "content": "You already have 6+ years of AWS hands-on experience with Lambda and API Gateway. The AWS Certified Developer Associate certification formalizes it and adds significant resume weight. At the Senior/Staff level, it's a fast pass through HR filters at product companies. Preparation time: 40-60 hours. Cost: ~$300 for the exam.",
+    "tags": "AWS,certification,cloud,salary"
+  },
+  {
+    "category": "learning",
+    "title": "TypeScript Deep Dive — Generics, Type Utilities, and Advanced Patterns",
+    "content": "Your current tools are TypeScript-based. Investing 15-20 hours in TypeScript generics, utility types (Mapped, Conditional, Infer), and design patterns will meaningfully improve your code quality and open doors to senior frontend/fullstack roles. Matt Pocock's 'Total TypeScript' course is the best investment here.",
+    "tags": "TypeScript,advanced,programming,skill-up"
+  },
+  {
+    "category": "technical",
+    "title": "Experiment with Model Context Protocol Servers in Production",
+    "content": "You're already using MCPs as a consumer. Build a custom MCP server from scratch for one of your internal tools — your Grafana dashboards or your test results database. Publishing a custom MCP server to the community (npm or GitHub) puts you in a very exclusive group of practitioners who understand the protocol at the implementation level, not just usage.",
+    "tags": "MCP,protocol,implementation,deep-tech"
+  },
+  {
+    "category": "technical",
+    "title": "Migrate Your RCA Machine to a Proper Agent Framework",
+    "content": "Refactor your RCA machine from a series of Claude CLI calls to a proper agent using LangGraph or the Anthropic Agents SDK. Add persistent memory (SQLite or Chroma), tool use with proper error recovery, and a feedback loop where agent performance improves over time. This is the architecture of real AI products — and it will make your RCA machine publishable.",
+    "tags": "agents,LangGraph,architecture,refactoring"
+  },
+  {
+    "category": "technical",
+    "title": "Implement Semantic Search Over Your Knowledge Base",
+    "content": "Your RCA machine heals a knowledge base but likely does exact-match or keyword search. Replacing that with vector embeddings (use OpenAI or Ollama locally) + pgvector or ChromaDB gives you semantic search — finding related issues even when wordings differ. This single architectural change will dramatically improve RCA accuracy.",
+    "tags": "vector-search,embeddings,RAG,architecture"
+  },
+  {
+    "category": "technical",
+    "title": "Build a Lightweight Observability Agent with ClickHouse + Claude",
+    "content": "You have ClickHouse experience from Niyo. Build a weekend project where Claude can query your ClickHouse instance via natural language, detect anomalies, and generate incident summaries. This demonstrates the data engineering + AI combination that's in high demand at fintech companies, and you can write about it publicly.",
+    "tags": "ClickHouse,observability,Claude,fintech,data"
+  }
+]
