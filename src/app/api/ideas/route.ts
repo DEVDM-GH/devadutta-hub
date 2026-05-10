@@ -41,7 +41,8 @@ export async function POST(req: NextRequest) {
       },
     });
     return NextResponse.json(idea, { status: 201 });
-  } catch {
+  } catch (err) {
+    console.error("[api/ideas POST]", err);
     return NextResponse.json({ error: "Failed to create idea" }, { status: 500 });
   }
 }
@@ -56,7 +57,8 @@ export async function PATCH(req: NextRequest) {
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
     const updated = await prisma.savedIdea.update({ where: { id }, data });
     return NextResponse.json(updated);
-  } catch {
+  } catch (err) {
+    console.error("[api/ideas PATCH]", err);
     return NextResponse.json({ error: "Failed to update idea" }, { status: 500 });
   }
 }
@@ -71,7 +73,8 @@ export async function DELETE(req: NextRequest) {
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
     await prisma.savedIdea.delete({ where: { id: parseInt(id) } });
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (err) {
+    console.error("[api/ideas DELETE]", err);
     return NextResponse.json({ error: "Failed to delete idea" }, { status: 500 });
   }
 }

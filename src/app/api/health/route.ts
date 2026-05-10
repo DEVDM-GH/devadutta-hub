@@ -19,7 +19,8 @@ export async function GET() {
       orderBy: { date: "desc" },
     });
     return NextResponse.json(entries);
-  } catch {
+  } catch (err) {
+    console.error("[api/health GET]", err);
     return NextResponse.json({ error: "Failed to fetch entries" }, { status: 500 });
   }
 }
@@ -42,7 +43,8 @@ export async function POST(req: NextRequest) {
       },
     });
     return NextResponse.json(entry, { status: 201 });
-  } catch {
+  } catch (err) {
+    console.error("[api/health POST]", err);
     return NextResponse.json({ error: "Failed to create entry" }, { status: 500 });
   }
 }
@@ -57,7 +59,8 @@ export async function DELETE(req: NextRequest) {
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
     await prisma.healthEntry.delete({ where: { id: parseInt(id) } });
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (err) {
+    console.error("[api/health DELETE]", err);
     return NextResponse.json({ error: "Failed to delete entry" }, { status: 500 });
   }
 }

@@ -131,7 +131,16 @@ Then merges are blocked until CI is green, while Vercel still runs its own build
 | `/dashboard/ideas` | AI Idea Lab |
 | `/dashboard/health` | Health Hub |
 
-API: `/api/auth/[...nextauth]`, `/api/ideas`, `/api/health`, `/api/ping`.
+API: `/api/auth/[...nextauth]`, `/api/ideas`, `/api/health`, `/api/ping`, `/api/debug/db` (signed-in DB diagnostic).
+
+### How data is saved
+
+1. The **browser** calls your **Next.js Route Handlers** (`/api/ideas`, `/api/health`) with `fetch` after you sign in (session cookie).
+2. Each handler checks **`auth()`**; then uses **`prisma`** from `src/lib/prisma.ts`.
+3. **Prisma** talks to **Turso** (remote SQLite) when `TURSO_DATABASE_URL` is set — `create`, `update`, `delete`, `findMany` all become SQL over LibSQL.
+4. **Nothing is written** until those tables exist on Turso. Creating tables is **not** automatic from Vercel env vars — run **`npm run db:apply-turso`** once from your laptop (see Database section).
+
+If APIs return 500 again: while logged in, open **`/api/debug/db`** in the browser. It returns JSON with row counts or a concrete `error` string (e.g. missing table). Vercel **Runtime Logs** also show `[api/ideas …]` lines after this deploy.
 
 ---
 

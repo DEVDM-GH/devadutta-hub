@@ -15,6 +15,11 @@ function createPrismaClient() {
   if (tursoUrl) {
     url = tursoUrl;
     authToken = tursoToken || undefined;
+    if (process.env.VERCEL && !tursoToken) {
+      console.error(
+        "[prisma] TURSO_DATABASE_URL is set but TURSO_AUTH_TOKEN is missing. Remote Turso requests will fail."
+      );
+    }
   } else {
     const dbPath = path.join(process.cwd(), "prisma", "dev.db").replace(/\\/g, "/");
     url = `file:${dbPath}`;
@@ -33,6 +38,7 @@ function createPrismaClient() {
 
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
-if (process.env.NODE_ENV !== "production") {
+// Reuse one client per serverless isolate (Vercel); same pattern as Prisma docs for Next.js.
+if (!globalForPrisma.prisma) {
   globalForPrisma.prisma = prisma;
 }
