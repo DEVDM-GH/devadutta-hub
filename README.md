@@ -70,10 +70,25 @@ Create **`.env.local`** in the project root (never commit it). Vercel uses the s
 ## Database & Prisma ORM 7
 
 - **Schema:** `prisma/schema.prisma`
-- **Migrations:** `prisma/migrations/` — use `npm run db:migrate` locally
+- **Migrations:** `prisma/migrations/` — use **`npm run db:migrate`** against your **local** SQLite file (`prisma.config.ts` points the Prisma CLI at `file:./prisma/dev.db`).
 - **Client:** Prisma 7 generates the client into **`src/generated/prisma/`** (gitignored). It is created by **`prisma generate`**, which runs automatically as part of **`npm run build`** and **`npm run seed-ideas`**.
 
 Do not import `PrismaClient` from `@prisma/client` in app code; use the generated client (see `src/lib/prisma.ts`).
+
+### Why Turso looked empty (even with Vercel env vars)
+
+**Environment variables only configure the app to *connect* to Turso.** They do **not** create tables. Until SQL from your migrations runs **on** the Turso database, the remote DB has no `HealthEntry` / `SavedIdea` tables — Turso Studio shows “No items” and `/api/ideas` returns 500.
+
+Prisma’s docs for Turso: run **`prisma migrate dev`** locally (SQLite file), then **apply** the generated `migration.sql` to Turso. This repo includes a helper:
+
+```bash
+# .env.local must contain TURSO_DATABASE_URL and TURSO_AUTH_TOKEN (same as Vercel). Node 20+.
+npm run db:apply-turso
+```
+
+That runs `scripts/apply-turso-schema.mjs`, which executes each `prisma/migrations/*/migration.sql` against Turso via `@libsql/client`. Re-running is mostly safe (existing tables are skipped with a warning).
+
+**Alternative (Turso CLI):** `turso db shell <your-db-name> < prisma/migrations/20260509195224_init/migration.sql` — replace `<your-db-name>` with the database name from the Turso dashboard.
 
 ---
 
@@ -149,6 +164,7 @@ scripts/
   idea-prompt.md
   ideas-output.json
   seed-ideas.mjs          ← Seeder (run via npm script + tsx)
+  apply-turso-schema.mjs  ← One-time / per-migration apply to Turso
 ```
 
 ---
@@ -170,6 +186,7 @@ scripts/
 | `npm run build` | `prisma generate` then `next build` |
 | `npm run start` | Production server (after build) |
 | `npm run lint` | ESLint |
-| `npm run db:migrate` | `prisma migrate dev` |
+| `npm run db:migrate` | `prisma migrate dev` (local SQLite) |
+| `npm run db:apply-turso` | Apply `prisma/migrations/*/migration.sql` to Turso (needs `TURSO_*` in `.env.local`) |
 | `npm run db:studio` | Prisma Studio |
 | `npm run seed-ideas` | Generate client + seed ideas JSON into DB |

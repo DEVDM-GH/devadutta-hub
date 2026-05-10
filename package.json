@@ -9,6 +9,7 @@
     "lint": "eslint",
     "seed-ideas": "prisma generate && tsx scripts/seed-ideas.mjs",
     "db:migrate": "prisma migrate dev",
+    "db:apply-turso": "node scripts/apply-turso-schema.mjs",
     "db:studio": "prisma studio"
   },
   "dependencies": {
@@ -32,6 +33,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
