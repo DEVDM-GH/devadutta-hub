@@ -1,6 +1,15 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 
+// On Vercel, never use a localhost AUTH_URL from a copied .env — OAuth would redirect there.
+if (process.env.VERCEL_URL) {
+  const authUrl = process.env.AUTH_URL ?? process.env.NEXTAUTH_URL;
+  if (authUrl?.includes("localhost")) {
+    delete process.env.AUTH_URL;
+    delete process.env.NEXTAUTH_URL;
+  }
+}
+
 const ALLOWED_EMAILS = (
   process.env.ALLOWED_EMAILS ?? "qa.devadutta@gmail.com,talk2devdmohapatra@gmail.com"
 )
@@ -10,6 +19,7 @@ const ALLOWED_EMAILS = (
 const isDev = process.env.NODE_ENV === "development";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true,
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
