@@ -19,7 +19,8 @@ export async function GET() {
       orderBy: [{ pinned: "desc" }, { createdAt: "desc" }],
     });
     return NextResponse.json(ideas);
-  } catch {
+  } catch (err) {
+    console.error("[api/ideas GET]", err);
     return NextResponse.json({ error: "Failed to fetch ideas" }, { status: 500 });
   }
 }

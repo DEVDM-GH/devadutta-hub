@@ -5,19 +5,26 @@ import path from "path";
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
 function createPrismaClient() {
-  const isProduction = process.env.NODE_ENV === "production";
-  const tursoUrl = process.env.TURSO_DATABASE_URL;
-  const tursoToken = process.env.TURSO_AUTH_TOKEN;
+  const tursoUrl = process.env.TURSO_DATABASE_URL?.trim();
+  const tursoToken = process.env.TURSO_AUTH_TOKEN?.trim();
 
   let url: string;
   let authToken: string | undefined;
 
-  if (isProduction && tursoUrl) {
+  // Use Turso whenever the URL is set (Vercel previews also use NODE_ENV=production for builds).
+  if (tursoUrl) {
     url = tursoUrl;
-    authToken = tursoToken;
+    authToken = tursoToken || undefined;
   } else {
     const dbPath = path.join(process.cwd(), "prisma", "dev.db").replace(/\\/g, "/");
     url = `file:${dbPath}`;
+  }
+
+  const onVercel = Boolean(process.env.VERCEL);
+  if (onVercel && !tursoUrl) {
+    console.error(
+      "[prisma] TURSO_DATABASE_URL is missing on Vercel. SQLite file at prisma/dev.db is not deployed; set TURSO_* env vars for all environments that hit the API."
+    );
   }
 
   const adapter = new PrismaLibSql({ url, authToken });
