@@ -1,0 +1,42 @@
+# Runs on every PR and push to main — same steps Vercel runs for build quality.
+# In GitHub: Settings → Branches → add rule → require status check "CI / verify" before merge.
+
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # Build imports auth config; Auth.js requires a secret. Not used at runtime in CI.
+      AUTH_SECRET: "00000000000000000000000000000000"
+      GOOGLE_CLIENT_ID: "000000000000-000000000000000000000.apps.googleusercontent.com"
+      GOOGLE_CLIENT_SECRET: "000000000000000000000000"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Production build
+        run: npm run build

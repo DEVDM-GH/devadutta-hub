@@ -2,6 +2,8 @@
 
 Personal command centre for Devadutta Mohapatra — public portfolio, private dashboard (**Google sign-in**), AI Idea Lab, and Health Hub.
 
+**Technical docs:** [docs/README.md](./docs/README.md) (architecture, stack, database, deployment, security, local development).
+
 ## Requirements
 
 - **Node.js 20+** (matches Vercel and Prisma 7; older Node will fail on `prisma` / `next build`)
