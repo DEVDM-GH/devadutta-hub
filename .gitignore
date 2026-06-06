@@ -49,6 +49,6 @@ next-env.d.ts
 /prisma/dev.db-wal
 
 # Cursor / AI tool files — not needed in repo
+.cursor/
 AGENTS.md
 CLAUDE.md
-

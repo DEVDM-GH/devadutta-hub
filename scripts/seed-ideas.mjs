@@ -1,53 +1,36 @@
-import { PrismaClient } from "../src/generated/prisma/client";
-import { PrismaLibSql } from "@prisma/adapter-libsql";
-import { readFileSync } from "fs";
-import { join, dirname } from "path";
+import { dirname, join } from "path";
 import { fileURLToPath } from "url";
+import { insertIdeas, loadIdeasFromDisk } from "./seed-ideas-core.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
-
-const dbPath = join(root, "prisma", "dev.db").replace(/\\/g, "/");
-const adapter = new PrismaLibSql({ url: `file:${dbPath}` });
-const prisma = new PrismaClient({ adapter });
+const dryRun = process.argv.includes("--dry-run");
 
 async function main() {
-  const filePath = join(__dirname, "ideas-output.json");
-  const raw = readFileSync(filePath, "utf-8");
-  const ideas = JSON.parse(raw);
-
-  if (!Array.isArray(ideas)) {
-    console.error("ideas-output.json must be a JSON array.");
-    process.exit(1);
+  const ideas = loadIdeasFromDisk(__dirname);
+  if (dryRun) {
+    const n = await insertIdeas(null, ideas, { dryRun: true });
+    console.log(`\n✅ [dry-run] Would seed ${n} ideas into prisma/dev.db (no writes).`);
+    return;
   }
 
-  let created = 0;
-  for (const idea of ideas) {
-    if (!idea.title || !idea.content || !idea.category) {
-      console.warn("Skipping incomplete idea:", idea.title || "(no title)");
-      continue;
-    }
-    await prisma.savedIdea.create({
-      data: {
-        category: idea.category,
-        title: idea.title,
-        content: idea.content,
-        tags: idea.tags ?? "",
-        pinned: false,
-      },
-    });
-    created++;
-    console.log(`  + ${idea.title}`);
-  }
+  const [{ PrismaClient }, { PrismaLibSql }] = await Promise.all([
+    import("../src/generated/prisma/client"),
+    import("@prisma/adapter-libsql"),
+  ]);
 
-  console.log(`\n✅ Seeded ${created} ideas into the database.`);
+  const dbPath = join(root, "prisma", "dev.db").replace(/\\/g, "/");
+  const adapter = new PrismaLibSql({ url: `file:${dbPath}` });
+  const prisma = new PrismaClient({ adapter });
+  try {
+    const created = await insertIdeas(prisma, ideas);
+    console.log(`\n✅ Seeded ${created} ideas into local prisma/dev.db.`);
+  } finally {
+    await prisma.$disconnect();
+  }
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

@@ -1,8 +1,8 @@
 # AI Idea Generator Prompt for Cursor
 
-Copy everything below this line and paste it into your Cursor chat window.
-Cursor will generate ideas tailored to your exact profile.
-Save the JSON output as `scripts/ideas-output.json`, then run `npm run seed-ideas`.
+**Automated (Gemini):** set **`GEMINI_API_KEY`** in `.env.local`, then run **`npm run generate-ideas`** (writes `ideas-output.json`) or **`npm run generate-ideas:local`** / **`generate-ideas:turso`** to generate and seed in one step. See **`docs/IDEAS_PIPELINE.md`**.
+
+**Manual (Cursor):** copy everything below this line into Cursor chat, save the JSON as `scripts/ideas-output.json`, then run **`npm run seed-ideas`** (local) or **`npm run seed-ideas:turso`** (Turso). Use **`*:dry`** scripts for no-write previews.
 
 ---
 

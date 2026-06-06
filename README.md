@@ -6,7 +6,7 @@ Personal command centre for Devadutta Mohapatra — public portfolio, private da
 
 ## Requirements
 
-- **Node.js 20+** (matches Vercel and Prisma 7; older Node will fail on `prisma` / `next build`)
+- **Node.js 20 LTS or 22 LTS** (matches Vercel / CI and Prisma 7; older Node will fail on `prisma` / `next build`)
 
 ---
 
@@ -18,8 +18,10 @@ npm install
 # First-time database (SQLite file at prisma/dev.db)
 npm run db:migrate
 
-# Optional: seed AI ideas from scripts/ideas-output.json
+# Optional: seed AI ideas from scripts/ideas-output.json (local dev.db)
 npm run seed-ideas
+# Optional: same file → Turso (needs TURSO_* in .env.local)
+# npm run seed-ideas:turso
 
 npm run dev
 ```
@@ -73,7 +75,7 @@ Create **`.env.local`** in the project root (never commit it). Vercel uses the s
 
 - **Schema:** `prisma/schema.prisma`
 - **Migrations:** `prisma/migrations/` — use **`npm run db:migrate`** against your **local** SQLite file (`prisma.config.ts` points the Prisma CLI at `file:./prisma/dev.db`).
-- **Client:** Prisma 7 generates the client into **`src/generated/prisma/`** (gitignored). It is created by **`prisma generate`**, which runs automatically as part of **`npm run build`** and **`npm run seed-ideas`**.
+- **Client:** Prisma 7 generates the client into **`src/generated/prisma/`** (gitignored). It is created by **`prisma generate`**, which runs automatically as part of **`npm run build`** and the **`seed-ideas`** / **`seed-ideas:turso`** npm scripts.
 
 Do not import `PrismaClient` from `@prisma/client` in app code; use the generated client (see `src/lib/prisma.ts`).
 
@@ -96,7 +98,7 @@ That runs `scripts/apply-turso-schema.mjs`, which executes each `prisma/migratio
 
 ## Deployment (Vercel)
 
-1. **Node:** 20.x in Vercel project settings.
+1. **Node:** **20.x** or **22.x** in Vercel project settings (this repo’s CI uses **22**).
 2. **Env:** `AUTH_SECRET`, `GOOGLE_*`, Turso vars for production, and **`AUTH_URL`** = your live `https://…` origin.
 3. **Google:** Production redirect URI and JS origin for that same host.
 4. **Build:** Default `npm run build` is correct (`prisma generate && next build`).
@@ -146,14 +148,25 @@ If APIs return 500 again: while logged in, open **`/api/debug/db`** in the brows
 
 ---
 
-## Generating new ideas (Cursor workflow)
+## Generating new ideas
+
+**Automated (Gemini):** add `GEMINI_API_KEY` to `.env.local` (see [docs/IDEAS_PIPELINE.md](./docs/IDEAS_PIPELINE.md)), then:
+
+```bash
+npm run generate-ideas:dry       # preview (no file write)
+npm run generate-ideas           # write scripts/ideas-output.json
+npm run generate-ideas:local   # generate + seed local dev.db only
+npm run generate-ideas:turso     # generate + seed Turso (needs TURSO_* in .env.local)
+```
+
+**Manual (Cursor):**
 
 1. Open `scripts/idea-prompt.md`
 2. Copy the prompt from the `---` line downward into your AI tool
 3. Paste the returned JSON array into `scripts/ideas-output.json`
-4. Run `npm run seed-ideas` (runs `prisma generate` then seeds via **tsx**)
+4. Run `npm run seed-ideas` (local file) or `npm run seed-ideas:turso` (Turso)
 
-Ideas show up under `/dashboard/ideas` against your local SQLite DB.
+**Where ideas appear in the app:** `npm run dev` uses **`prisma/dev.db`** only when **`TURSO_*` is unset** in `.env.local`. If **`TURSO_*` is set**, the running app reads **Turso** — use **`seed-ideas:turso`** or **`generate-ideas:turso`** to update what you see at `/dashboard/ideas`. See [docs/IDEAS_PIPELINE.md](./docs/IDEAS_PIPELINE.md).
 
 ---
 
@@ -174,7 +187,10 @@ prisma.config.ts          ← Prisma CLI datasource (local file URL)
 scripts/
   idea-prompt.md
   ideas-output.json
-  seed-ideas.mjs          ← Seeder (run via npm script + tsx)
+  generate-ideas-gemini.mjs ← Gemini Interactions API → ideas-output.json
+  seed-ideas-core.mjs     ← Shared import logic (local + Turso)
+  seed-ideas.mjs          ← Local `dev.db` (tsx after `prisma generate`)
+  seed-ideas-turso.mjs    ← Turso (`TURSO_*`; tsx after `prisma generate`)
   apply-turso-schema.mjs  ← One-time / per-migration apply to Turso
 ```
 
@@ -200,4 +216,11 @@ scripts/
 | `npm run db:migrate` | `prisma migrate dev` (local SQLite) |
 | `npm run db:apply-turso` | Apply `prisma/migrations/*/migration.sql` to Turso (needs `TURSO_*` in `.env.local`) |
 | `npm run db:studio` | Prisma Studio |
-| `npm run seed-ideas` | Generate client + seed ideas JSON into DB |
+| `npm run seed-ideas` | `prisma generate` + seed **`scripts/ideas-output.json`** into **local** `dev.db` |
+| `npm run seed-ideas:dry` | Preview local seed (no DB writes) |
+| `npm run seed-ideas:turso` | Same JSON → **Turso** (needs `TURSO_*`; see [docs/IDEAS_PIPELINE.md](./docs/IDEAS_PIPELINE.md)) |
+| `npm run seed-ideas:turso:dry` | Preview Turso seed (no network) |
+| `npm run generate-ideas` | Gemini → write **`scripts/ideas-output.json`** (needs `GEMINI_API_KEY`) |
+| `npm run generate-ideas:dry` | Gemini preview; no file write |
+| `npm run generate-ideas:local` | Generate + seed **local** `dev.db` |
+| `npm run generate-ideas:turso` | Generate + seed **Turso** |

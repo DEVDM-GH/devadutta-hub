@@ -10,6 +10,7 @@ This folder is the **source of truth** for architecture, stack, deployment, data
 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Vercel, env vars, CI, build, OAuth, operational checklist |
 | [SECURITY.md](./SECURITY.md) | Auth model, headers, CSP, secrets, access control |
 | [DEVELOPMENT.md](./DEVELOPMENT.md) | Local setup, scripts, conventions, idea seeding |
+| [IDEAS_PIPELINE.md](./IDEAS_PIPELINE.md) | Local vs Turso idea import, optional GitHub Action |
 
 **Related repo files**
 
