@@ -57,7 +57,10 @@ Optional dependency present for future DB-backed sessions: **`@auth/prisma-adapt
 | Package | Role |
 |---------|------|
 | **eslint** + **eslint-config-next** | Lint |
-| **tsx** | Run `seed-ideas.mjs` and TS-heavy scripts |
+| **tsx** | Run `seed-ideas*.mjs` after `prisma generate` (generated client is **TypeScript**; plain `node` cannot resolve it) |
+| **@google/genai** `≥ 2.0` | Gemini **Interactions API** in `scripts/generate-ideas-gemini.mjs` (dev-only; not used by Next.js runtime) |
+| **@esbuild/win32-x64** | Windows-only optional dep for **tsx** seed scripts (skipped on Linux/Vercel) |
+| **Node** | `seed-ideas*:dry` and `generate-ideas*` (plain `node`; no Prisma import on dry paths) |
 | **dotenv** | Load `.env` / `.env.local` for CLI scripts |
 
 ## Infrastructure (external)

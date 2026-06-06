@@ -1,0 +1,44 @@
+# Optional: generate ideas with Gemini, then import into Turso (manual only).
+#
+# Setup — Repo → Settings → Secrets → Actions:
+#   GEMINI_API_KEY          (Google AI Studio — NOT OAuth client credentials)
+#   TURSO_DATABASE_URL
+#   TURSO_AUTH_TOKEN
+#
+# Run: Actions → "Generate and seed ideas to Turso" → Run workflow → choose branch → Run
+#
+# Does not commit ideas-output.json back to the repo; it seeds Turso directly.
+
+name: Generate and seed ideas to Turso
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate-and-seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate ideas with Gemini
+        run: node scripts/generate-ideas-gemini.mjs
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Import ideas JSON into Turso
+        run: npx tsx scripts/seed-ideas-turso.mjs
+        env:
+          TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}

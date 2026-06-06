@@ -97,11 +97,17 @@ prisma/
   migrations/
 prisma.config.ts             # Prisma CLI datasource (local file)
 scripts/
-  seed-ideas.mjs
+  generate-ideas-gemini.mjs # Gemini Interactions API → ideas-output.json
+  seed-ideas.mjs            # local dev.db import
+  seed-ideas-turso.mjs      # Turso import (TURSO_*)
+  seed-ideas-core.mjs       # shared JSON → SavedIdea logic
   apply-turso-schema.mjs
   idea-prompt.md
   ideas-output.json
-.github/workflows/ci.yml
+.github/workflows/
+  ci.yml                    # lint + build on push/PR
+  seed-turso-ideas.yml      # optional manual: JSON → Turso
+  generate-seed-turso-ideas.yml  # optional manual: Gemini → Turso
 next.config.ts               # Security headers + CSP
 ```
 
@@ -115,7 +121,7 @@ next.config.ts               # Security headers + CSP
 
 ## Build-time vs runtime
 
-- **`prisma generate`** runs during **`npm run build`** (and seed script). Output: **`src/generated/prisma/`** (gitignored). TypeScript imports **`@/generated/prisma/client`**, not `@prisma/client` for the app instance.
+- **`prisma generate`** runs during **`npm run build`** and the **`npm run seed-ideas`** / **`npm run seed-ideas:turso`** scripts (not the **`*:dry`** scripts). Output: **`src/generated/prisma/`** (gitignored). TypeScript imports **`@/generated/prisma/client`**, not `@prisma/client` for the app instance.
 - **Vercel** does not ship `prisma/dev.db`; production **must** have Turso env vars and remote schema.
 
 ## Future notes

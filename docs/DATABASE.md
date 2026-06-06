@@ -36,15 +36,19 @@ Prisma’s Turso guidance: develop migrations against **local SQLite**, then **a
 | **`npm run db:migrate`** | `prisma migrate dev` — evolves **local** `dev.db` and writes migration folders |
 | **`npm run db:apply-turso`** | Executes every **`prisma/migrations/*/migration.sql`** against Turso using `@libsql/client` (reads `.env` / `.env.local`) |
 | **`npm run db:studio`** | Prisma Studio against CLI datasource (local file) |
-| **`npm run seed-ideas`** | Inserts rows from **`scripts/ideas-output.json`** into **local** `dev.db` only (not Turso) |
+| **`npm run seed-ideas`** | `prisma generate` + **`tsx`** — inserts **`scripts/ideas-output.json`** into **local** `dev.db` only |
+| **`npm run seed-ideas:dry`** | Plain **Node** — validates JSON and lists rows that **would** be imported locally (no DB, no `prisma generate`) |
+| **`npm run seed-ideas:turso`** | `prisma generate` + **`tsx`** — inserts the same JSON into **Turso** (`TURSO_*` in `.env.local` or CI) |
+| **`npm run seed-ideas:turso:dry`** | Plain **Node** — same preview as above for Turso target (no network) |
 
-## Seeding production ideas
+## Seeding ideas (local vs Turso)
 
-`seed-ideas.mjs` is intentionally bound to the **local file** path. To bulk-load ideas on Turso:
+- **`scripts/seed-ideas.mjs`** uses the **local file** SQLite URL only — safe default for dev.
+- **`scripts/seed-ideas-turso.mjs`** (and **`npm run seed-ideas:turso`**) uses **`TURSO_*`** + `PrismaLibSql` like the app.
 
-1. Use Turso **SQL console** / import, or  
-2. Extend a script to use the same `TURSO_*` + `PrismaLibSql` pattern as `apply-turso-schema.mjs`, or  
-3. Use the live app UI after tables exist.
+Same source file: **`scripts/ideas-output.json`**. Each successful run **inserts** new `SavedIdea` rows (no dedupe). For dry-run, CI, and troubleshooting (including Windows **`@esbuild/win32-x64`**), see **[IDEAS_PIPELINE.md](./IDEAS_PIPELINE.md)**.
+
+Other options: Turso **SQL console** / manual SQL, or create ideas through the **live app** after tables exist.
 
 ## Diagnostics
 
