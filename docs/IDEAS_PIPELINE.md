@@ -223,7 +223,7 @@ Use a key from [Google AI Studio](https://aistudio.google.com/apikey), not OAuth
 Free-tier quota exceeded — wait or upgrade billing on the Google Cloud project tied to the key.
 
 **`tsx`: “The package `@esbuild/win32-x64` could not be found” (Windows)**  
-Run `npm install` in the repo. **`@esbuild/win32-x64`** is declared as a **direct** devDependency (aligned with the `esbuild` version used by `tsx`) so the native binary is installed even when nested optional dependencies are omitted.
+Run `npm install` in the repo. **`@esbuild/win32-x64`** is an **optionalDependency** (Windows only) so local **tsx** seed scripts get the native binary; Vercel/Linux skips it without failing the build.
 
 ---
 

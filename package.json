@@ -35,8 +35,10 @@
     "recharts": "^3.8.1",
     "tailwind-merge": "^3.5.0"
   },
+  "optionalDependencies": {
+    "@esbuild/win32-x64": "0.27.7"
+  },
   "devDependencies": {
-    "@esbuild/win32-x64": "0.27.7",
     "@google/genai": "^2.8.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
