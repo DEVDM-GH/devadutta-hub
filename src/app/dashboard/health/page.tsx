@@ -154,7 +154,7 @@ function CoachingCard({ insight }: { insight: HealthInsight | null }) {
         <Sparkles size={18} className="text-pink-400 mt-0.5 shrink-0" />
         <div className="flex-1 min-w-0">
           <p className="text-xs text-pink-400 font-medium mb-1 uppercase tracking-wide">
-            Gemini Coaching · {new Date(insight.generatedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+            Gemini Coaching · from your last {insight.entryCount} {insight.entryCount === 1 ? "entry" : "entries"} · {new Date(insight.generatedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
           </p>
           <p className="text-slate-100 font-semibold leading-snug">{insight.headline}</p>
         </div>

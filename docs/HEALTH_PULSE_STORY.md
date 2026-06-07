@@ -1,7 +1,7 @@
 # Health Pulse — Feature Story
 
 > Branch: `feat/health-hub-gemini-showcase`  
-> Status: Planning → Building  
+> Status: **Implemented — pending PR merge**  
 > Last updated: Jun 7, 2026
 
 ---
