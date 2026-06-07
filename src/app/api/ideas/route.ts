@@ -1,17 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { canAccess } from "@/lib/access";
 import { prisma } from "@/lib/prisma";
 
-async function requireAuth() {
+async function requireAdmin() {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!canAccess(session.user.email, "ideas")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   return null;
 }
 
 export async function GET() {
-  const denied = await requireAuth();
+  const denied = await requireAdmin();
   if (denied) return denied;
 
   try {
@@ -26,7 +30,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const denied = await requireAuth();
+  const denied = await requireAdmin();
   if (denied) return denied;
 
   try {
@@ -48,7 +52,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  const denied = await requireAuth();
+  const denied = await requireAdmin();
   if (denied) return denied;
 
   try {
@@ -64,7 +68,7 @@ export async function PATCH(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const denied = await requireAuth();
+  const denied = await requireAdmin();
   if (denied) return denied;
 
   try {

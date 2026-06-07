@@ -1,12 +1,11 @@
-/**
- * Apply local prisma/migrations/*/migration.sql files to your remote Turso DB.
- *
- * Vercel env vars only connect the *running app* to Turso; they do not run SQL.
- * Prisma Migrate is aimed at your local file DB (prisma.config.ts); Turso needs this one-time (or per-migration) apply.
- *
- * Usage (Node 20+): ensure .env.local has TURSO_DATABASE_URL + TURSO_AUTH_TOKEN, then:
- *   npm run db:apply-turso
- */
+// Apply local prisma/migrations/<folder>/migration.sql files to your remote Turso DB.
+//
+// Vercel env vars only connect the running app to Turso; they do not run SQL.
+// Prisma Migrate targets your local file DB (prisma.config.ts); Turso needs this
+// one-time (or per-migration) apply.
+//
+// Usage (Node 20+): ensure .env.local has TURSO_DATABASE_URL + TURSO_AUTH_TOKEN, then:
+//   npm run db:apply-turso
 import { createClient } from "@libsql/client";
 import { config } from "dotenv";
 import { existsSync, readdirSync, readFileSync } from "fs";

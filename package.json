@@ -15,6 +15,13 @@
     "generate-ideas:dry": "node scripts/generate-ideas-gemini.mjs --dry-run",
     "generate-ideas:local": "node scripts/generate-ideas-gemini.mjs && npm run seed-ideas",
     "generate-ideas:turso": "node scripts/generate-ideas-gemini.mjs && npm run seed-ideas:turso",
+    "generate-health": "node scripts/generate-health-gemini.mjs",
+    "generate-health:dry": "node scripts/generate-health-gemini.mjs --dry-run",
+    "generate-health:turso": "node scripts/generate-health-gemini.mjs --turso",
+    "seed-health-demo": "node scripts/seed-health-demo.mjs",
+    "seed-health-demo:turso": "node scripts/seed-health-demo.mjs --turso",
+    "seed-health-demo:force": "node scripts/seed-health-demo.mjs --force",
+    "seed-health-demo:turso:force": "node scripts/seed-health-demo.mjs --turso --force",
     "db:migrate": "prisma migrate dev",
     "db:apply-turso": "node scripts/apply-turso-schema.mjs",
     "db:studio": "prisma studio"

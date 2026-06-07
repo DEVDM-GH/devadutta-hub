@@ -9,6 +9,7 @@ datasource db {
 
 model HealthEntry {
   id          Int      @id @default(autoincrement())
+  userEmail   String?
   date        String
   weightKg    Float?
   calories    Int?
@@ -27,4 +28,16 @@ model SavedIdea {
   tags      String   @default("")
   pinned    Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+model HealthInsight {
+  id           Int      @id @default(autoincrement())
+  userEmail    String
+  headline     String
+  weeklyRead   String
+  priorities   String   // JSON stringified string[] — SQLite has no native array type
+  todayAction  String
+  workoutFocus String
+  entryCount   Int
+  generatedAt  DateTime @default(now())
 }
