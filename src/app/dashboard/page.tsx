@@ -1,49 +1,67 @@
 import Link from "next/link";
 import { Lightbulb, Heart, ArrowRight, Bot, Activity, Cpu } from "lucide-react";
+import { auth } from "@/auth";
+import { getAllowedModules, getDisplayName } from "@/lib/access";
 
-const quickLinks = [
+const ALL_QUICK_LINKS = [
   {
+    module: "ideas",
     href: "/dashboard/ideas",
     title: "AI Idea Lab",
     description: "Browse and manage career ideas, project suggestions, and learning paths generated for your profile.",
     icon: Lightbulb,
     accent: "from-cyan-500 to-blue-600",
     border: "border-cyan-500/20 hover:border-cyan-500/50",
-    count: "Ideas saved",
   },
   {
+    module: "health",
     href: "/dashboard/health",
-    title: "Health Hub",
-    description: "Log your health metrics, track weight trends, and get AI-powered dietary and workout suggestions.",
+    title: "Health Pulse",
+    description: "Log your metrics, get Gemini-powered coaching tailored to you — your data, your persona, your plan.",
     icon: Heart,
     accent: "from-pink-500 to-rose-600",
     border: "border-pink-500/20 hover:border-pink-500/50",
-    count: "Entries logged",
   },
 ];
 
-const tips = [
+const ALL_TIPS = [
   {
+    module: "ideas",
     icon: Bot,
     title: "Generate Ideas",
     body: "Open the AI Idea Lab → paste the prompt from scripts/idea-prompt.md into Cursor → save the output to scripts/ideas-output.json → run npm run seed-ideas.",
   },
   {
+    module: "health",
     icon: Activity,
-    title: "Track Health",
-    body: "Log your weight, calories, sleep, and water intake daily in Health Hub. After 7+ entries, the AI suggestion engine has enough data to give personalized advice.",
+    title: "Track Your Health",
+    body: "Log weight, sleep, calories, and workouts in Health Pulse. Run generate-health to get Gemini coaching built from your actual data.",
   },
   {
+    module: null,
     icon: Cpu,
     title: "Your Profile",
     body: "Your public landing page at / is live and shows your full portfolio. Share it with recruiters and LinkedIn connections.",
   },
 ];
 
-export default function DashboardHome() {
+export default async function DashboardHome() {
+  const session = await auth();
+  const email = session?.user?.email;
+  const allowedModules = getAllowedModules(email);
+  const displayName = getDisplayName(email);
+
   const hour = new Date().getHours();
   const greeting =
     hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+
+  const quickLinks = ALL_QUICK_LINKS.filter((l) =>
+    (allowedModules as readonly string[]).includes(l.module)
+  );
+
+  const tips = ALL_TIPS.filter(
+    (t) => t.module === null || (allowedModules as readonly string[]).includes(t.module)
+  );
 
   return (
     <div className="p-8 max-w-5xl">
@@ -51,10 +69,10 @@ export default function DashboardHome() {
       <div className="mb-10">
         <p className="text-slate-500 text-sm mb-1">{greeting},</p>
         <h1 className="text-3xl font-bold mb-2">
-          Welcome back, <span className="gradient-text">Devadutta</span> 👋
+          Welcome back, <span className="gradient-text">{displayName}</span> 👋
         </h1>
         <p className="text-slate-400">
-          Senior SDET · AI Builder · Fintech · Bangalore
+          {email ?? "Your personal command centre"}
         </p>
       </div>
 
@@ -62,9 +80,9 @@ export default function DashboardHome() {
       <div className="bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-500/20 rounded-xl p-4 mb-10 flex items-start gap-3">
         <span className="text-2xl mt-0.5">🚀</span>
         <div>
-          <div className="font-semibold text-sm mb-1">You're building momentum.</div>
+          <div className="font-semibold text-sm mb-1">Your hub is ready.</div>
           <div className="text-slate-400 text-sm">
-            Your RCA machine is live. Your CV enrichment tool is in progress. This hub is your personal command centre — track ideas, health, and your growth journey from here.
+            Powered by Gemini — log your data, generate insights, and let the AI coach you. Everything here is built for you.
           </div>
         </div>
       </div>

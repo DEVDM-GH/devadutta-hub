@@ -15,26 +15,33 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/ideas", label: "AI Idea Lab", icon: Lightbulb },
-  { href: "/dashboard/health", label: "Health Hub", icon: Heart },
+// module: null means always visible (no access check needed)
+const ALL_NAV_ITEMS = [
+  { href: "/dashboard",        label: "Dashboard",   icon: LayoutDashboard, module: null     },
+  { href: "/dashboard/ideas",  label: "AI Idea Lab", icon: Lightbulb,       module: "ideas"  },
+  { href: "/dashboard/health", label: "Health Pulse", icon: Heart,          module: "health" },
 ];
 
 function SidebarContent({
   userName,
   userEmail,
   userImage,
+  allowedModules,
   signOutButton,
   onClose,
 }: {
   userName?: string | null;
   userEmail?: string | null;
   userImage?: string | null;
+  allowedModules: readonly string[];
   signOutButton: React.ReactNode;
   onClose?: () => void;
 }) {
   const pathname = usePathname();
+
+  const navItems = ALL_NAV_ITEMS.filter(
+    (item) => item.module === null || allowedModules.includes(item.module)
+  );
 
   return (
     <div className="flex flex-col h-full">
@@ -120,12 +127,14 @@ export default function SidebarClient({
   userName,
   userEmail,
   userImage,
+  allowedModules,
   signOutButton,
 }: {
   children: React.ReactNode;
   userName?: string | null;
   userEmail?: string | null;
   userImage?: string | null;
+  allowedModules: readonly string[];
   signOutButton: React.ReactNode;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -143,6 +152,7 @@ export default function SidebarClient({
           userName={userName}
           userEmail={userEmail}
           userImage={userImage}
+          allowedModules={allowedModules}
           signOutButton={signOutButton}
         />
       </aside>
@@ -166,6 +176,7 @@ export default function SidebarClient({
           userName={userName}
           userEmail={userEmail}
           userImage={userImage}
+          allowedModules={allowedModules}
           signOutButton={signOutButton}
           onClose={() => setMobileOpen(false)}
         />

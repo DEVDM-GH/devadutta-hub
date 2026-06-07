@@ -2,20 +2,29 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
-async function requireAuth() {
+/**
+ * Returns the authenticated user's email, or an error response.
+ * Centralises auth in one place; callers destructure { email, denied }.
+ */
+async function getAuthedEmail(): Promise<
+  | { email: string; denied: null }
+  | { email: null; denied: NextResponse }
+> {
   const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const email = session?.user?.email;
+  if (!email) {
+    return { email: null, denied: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
   }
-  return null;
+  return { email, denied: null };
 }
 
 export async function GET() {
-  const denied = await requireAuth();
+  const { email, denied } = await getAuthedEmail();
   if (denied) return denied;
 
   try {
     const entries = await prisma.healthEntry.findMany({
+      where: { userEmail: email },
       orderBy: { date: "desc" },
     });
     return NextResponse.json(entries);
@@ -26,13 +35,14 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const denied = await requireAuth();
+  const { email, denied } = await getAuthedEmail();
   if (denied) return denied;
 
   try {
     const body = await req.json();
     const entry = await prisma.healthEntry.create({
       data: {
+        userEmail: email,
         date: body.date,
         weightKg: body.weightKg ? parseFloat(body.weightKg) : null,
         calories: body.calories ? parseInt(body.calories) : null,
@@ -50,14 +60,18 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const denied = await requireAuth();
+  const { email, denied } = await getAuthedEmail();
   if (denied) return denied;
 
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
-    await prisma.healthEntry.delete({ where: { id: parseInt(id) } });
+
+    // Scope delete to the owner — prevents one user from deleting another's rows
+    await prisma.healthEntry.deleteMany({
+      where: { id: parseInt(id), userEmail: email },
+    });
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("[api/health DELETE]", err);
