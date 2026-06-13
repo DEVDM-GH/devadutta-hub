@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Lightbulb, Heart, ArrowRight, Bot, Activity, Cpu } from "lucide-react";
 import { auth } from "@/auth";
-import { getAllowedModules, getDisplayName } from "@/lib/access";
+import { getAllowedModules, getDisplayName, getPersona, isAdmin } from "@/lib/access";
+import PersonaTeaser from "./PersonaTeaser";
 
 const ALL_QUICK_LINKS = [
   {
@@ -50,6 +51,8 @@ export default async function DashboardHome() {
   const email = session?.user?.email;
   const allowedModules = getAllowedModules(email);
   const displayName = getDisplayName(email);
+  const persona = getPersona(email);
+  const userIsAdmin = isAdmin(email);
 
   const hour = new Date().getHours();
   const greeting =
@@ -86,6 +89,13 @@ export default async function DashboardHome() {
           </div>
         </div>
       </div>
+
+      {/* Persona teaser (members) — admin panel slot (admins, coming soon) */}
+      {!userIsAdmin && (
+        <div className="mb-10">
+          <PersonaTeaser persona={persona} />
+        </div>
+      )}
 
       {/* Quick Links */}
       <h2 className="text-lg font-semibold mb-4 text-slate-300">Your Sections</h2>

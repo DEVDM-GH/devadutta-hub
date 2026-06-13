@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+#tasks
+docs\TASKS.md
+
 # next.js
 /.next/
 /out/
@@ -52,3 +55,6 @@ next-env.d.ts
 .cursor/
 AGENTS.md
 CLAUDE.md
+
+# Local session scratch pad — never commit
+WIP.md
