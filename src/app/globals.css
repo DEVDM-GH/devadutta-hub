@@ -88,6 +88,11 @@ body {
   animation: fadeInUp 0.6s ease forwards;
 }
 
+/* Navigation overlay spinner */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* Recharts tooltip override */
 .recharts-tooltip-wrapper .recharts-default-tooltip {
   background: #1e293b !important;

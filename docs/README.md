@@ -11,6 +11,7 @@ This folder is the **source of truth** for architecture, stack, deployment, data
 | [SECURITY.md](./SECURITY.md) | Auth model, headers, CSP, secrets, access control |
 | [DEVELOPMENT.md](./DEVELOPMENT.md) | Local setup, scripts, conventions, idea seeding |
 | [IDEAS_PIPELINE.md](./IDEAS_PIPELINE.md) | Local vs Turso idea import, optional GitHub Action |
+| [KNOWN_LIMITATIONS.md](./KNOWN_LIMITATIONS.md) | Operational constraints (Vercel timeouts, coaching refresh, scaling) |
 
 **Related repo files**
 

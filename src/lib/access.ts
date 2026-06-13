@@ -15,7 +15,7 @@
 // Modules
 // ---------------------------------------------------------------------------
 
-export const MODULES = ["ideas", "health"] as const;
+export const MODULES = ["ideas", "health", "admin"] as const;
 export type Module = (typeof MODULES)[number];
 
 // ---------------------------------------------------------------------------
@@ -26,7 +26,7 @@ export const ROLES = ["admin", "member"] as const;
 export type Role = (typeof ROLES)[number];
 
 const ROLE_MODULES: Record<Role, readonly Module[]> = {
-  admin:  ["ideas", "health"],
+  admin:  ["ideas", "health", "admin"],
   member: ["health"],
 };
 
@@ -112,4 +112,9 @@ export function canAccess(email: string | null | undefined, module: Module): boo
 /** Returns true if this email has the admin role. */
 export function isAdmin(email: string | null | undefined): boolean {
   return getRole(email) === "admin";
+}
+
+/** Returns all emails explicitly configured in EMAIL_CONFIG (used by admin bulk-generation). */
+export function getAllManagedEmails(): string[] {
+  return Object.keys(EMAIL_CONFIG);
 }

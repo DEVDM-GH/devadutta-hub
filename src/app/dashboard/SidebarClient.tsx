@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import { useNavigationOverlay } from "@/components/NavigationOverlay";
 import {
   LayoutDashboard,
   Lightbulb,
@@ -12,14 +13,16 @@ import {
   Cpu,
   Menu,
   X,
+  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // module: null means always visible (no access check needed)
 const ALL_NAV_ITEMS = [
-  { href: "/dashboard",        label: "Dashboard",   icon: LayoutDashboard, module: null     },
-  { href: "/dashboard/ideas",  label: "AI Idea Lab", icon: Lightbulb,       module: "ideas"  },
-  { href: "/dashboard/health", label: "Health Pulse", icon: Heart,          module: "health" },
+  { href: "/dashboard",        label: "Dashboard",    icon: LayoutDashboard, module: null     },
+  { href: "/dashboard/ideas",  label: "AI Idea Lab",  icon: Lightbulb,       module: "ideas"  },
+  { href: "/dashboard/health", label: "Health Pulse", icon: Heart,           module: "health" },
+  { href: "/dashboard/admin",  label: "Admin",        icon: Shield,          module: "admin"  },
 ];
 
 function SidebarContent({
@@ -38,6 +41,7 @@ function SidebarContent({
   onClose?: () => void;
 }) {
   const pathname = usePathname();
+  const { show } = useNavigationOverlay();
 
   const navItems = ALL_NAV_ITEMS.filter(
     (item) => item.module === null || allowedModules.includes(item.module)
@@ -71,7 +75,10 @@ function SidebarContent({
             <Link
               key={item.href}
               href={item.href}
-              onClick={onClose}
+              onClick={() => {
+                if (!active) show();
+                onClose?.();
+              }}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
                 active
@@ -91,6 +98,7 @@ function SidebarContent({
       <div className="p-4 border-t border-slate-800 space-y-1">
         <Link
           href="/"
+          onClick={() => show()}
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition-all"
         >
           <Home size={18} />

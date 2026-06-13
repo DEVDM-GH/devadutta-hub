@@ -11,9 +11,13 @@
 //   node scripts/generate-health-gemini.mjs --email qa.devadutta@gmail.com
 //   node scripts/generate-health-gemini.mjs --email qa.devadutta@gmail.com --dry-run
 //   node scripts/generate-health-gemini.mjs --email qa.devadutta@gmail.com --turso
+//   node scripts/generate-health-gemini.mjs --all
+//   node scripts/generate-health-gemini.mjs --all --turso
+//   node scripts/generate-health-gemini.mjs --all --dry-run
 //
 // Flags (pass after --  when using npm run):
-//   --email <email>    Which user to generate coaching for (required)
+//   --email <email>    Which user to generate coaching for (required unless --all)
+//   --all              Generate coaching for every user in PERSONA_MAP
 //   --dry-run          Call Gemini and print output; do NOT write to DB
 //   --turso            Force Turso even if called as generate-health (not :turso)
 //
@@ -42,13 +46,15 @@ config({ path: resolve(root, ".env.local") });
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
 const forceTurso = args.includes("--turso");
+const runAll = args.includes("--all");
 
 const emailFlagIdx = args.indexOf("--email");
 const targetEmail = emailFlagIdx !== -1 ? args[emailFlagIdx + 1]?.toLowerCase() : null;
 
-if (!targetEmail) {
-  console.error("Error: --email <email> is required.");
+if (!runAll && !targetEmail) {
+  console.error("Error: --email <email> is required (or use --all for all users).");
   console.error("  Example: node scripts/generate-health-gemini.mjs --email qa.devadutta@gmail.com");
+  console.error("  Example: node scripts/generate-health-gemini.mjs --all");
   process.exit(1);
 }
 
@@ -161,24 +167,25 @@ function buildPrompt(personaPrompt, entries) {
 ${logTable}
 \`\`\`
 
-Based on the data above, generate the coaching output now. Respond with valid JSON only — no markdown fences, no explanation outside the JSON object.`;
+Based on the data above, generate the coaching output now.
+
+Respond with valid JSON matching this EXACT structure — no extra fields, no nested objects, no markdown fences:
+{
+  "headline": "<one punchy sentence summarising the week>",
+  "weeklyRead": "<2-3 sentence narrative of what the data shows>",
+  "priorities": [
+    "<priority 1 as a plain string>",
+    "<priority 2 as a plain string>",
+    "<priority 3 as a plain string>"
+  ],
+  "todayAction": "<one concrete action to take today>",
+  "workoutFocus": "<workout recommendation for today or next session>"
+}`;
 }
 
 // ---------------------------------------------------------------------------
 // Gemini call
 // ---------------------------------------------------------------------------
-
-const insightSchema = {
-  type: "object",
-  properties: {
-    headline:     { type: "string" },
-    weeklyRead:   { type: "string" },
-    priorities:   { type: "array", items: { type: "string" }, minItems: 3, maxItems: 3 },
-    todayAction:  { type: "string" },
-    workoutFocus: { type: "string" },
-  },
-  required: ["headline", "weeklyRead", "priorities", "todayAction", "workoutFocus"],
-};
 
 async function callGemini(prompt) {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
@@ -195,15 +202,18 @@ async function callGemini(prompt) {
     model,
     input: prompt,
     generation_config: { temperature: 0.4 },
-    response_format: {
-      type: "text",
-      mime_type: "application/json",
-      schema: insightSchema,
-    },
+    store: false,
   });
 
-  const text = interaction.output_text?.trim();
-  if (!text) throw new Error("Gemini returned no output. Check API key and quota.");
+  // New steps schema — output_text removed June 8 2026
+  // Use findLast to skip thought/tool steps and land on the actual model_output step
+  const outputStep = interaction.steps?.findLast((s) => s.type === "model_output");
+  const text = outputStep?.content?.find((c) => c.type === "text")?.text?.trim();
+  if (!text) {
+    // Debug: print step types so we can diagnose unexpected responses
+    const stepTypes = interaction.steps?.map((s) => s.type).join(", ") ?? "none";
+    throw new Error(`Gemini returned no text output. Steps: [${stepTypes}]`);
+  }
   return text;
 }
 
@@ -211,7 +221,16 @@ function parseInsight(text) {
   const trimmed = text.trim();
   const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
   const payload = fenced ? fenced[1].trim() : trimmed;
-  const insight = JSON.parse(payload);
+  const raw = JSON.parse(payload);
+
+  // Normalize snake_case → camelCase (Gemini may return either without a schema)
+  const insight = {
+    headline:     raw.headline,
+    weeklyRead:   raw.weeklyRead   ?? raw.weekly_read,
+    priorities:   raw.priorities,
+    todayAction:  raw.todayAction  ?? raw.today_action,
+    workoutFocus: raw.workoutFocus ?? raw.workout_focus,
+  };
 
   if (!insight.headline || !insight.weeklyRead || !Array.isArray(insight.priorities) ||
       !insight.todayAction || !insight.workoutFocus) {
@@ -250,47 +269,85 @@ async function writeInsight(client, email, insight, entryCount) {
 }
 
 // ---------------------------------------------------------------------------
-// Main
+// Core: generate for a single user (shared by single + all modes)
 // ---------------------------------------------------------------------------
 
-async function main() {
-  const personaId = getPersonaId(targetEmail);
-  console.log(`\nGenerating health coaching for: ${targetEmail}`);
-  console.log(`Persona: ${personaId}`);
+async function generateForUser(db, email) {
+  const personaId = getPersonaId(email);
+  console.log(`\n── ${email} (${personaId}) ${"─".repeat(Math.max(0, 50 - email.length))}`);
 
   const personaPrompt = loadPersonaPrompt(personaId);
-  const db = createDbClient();
-
-  const entries = await fetchEntries(db, targetEmail);
+  const entries = await fetchEntries(db, email);
   console.log(`Entries found: ${entries.length}`);
 
   if (entries.length === 0) {
-    console.error(`No health entries found for ${targetEmail}.`);
-    console.error("Seed some data first: npm run seed-health-demo");
-    process.exit(1);
+    throw new Error(`No health entries found. Seed first: npm run seed-health-demo`);
   }
 
   const prompt = buildPrompt(personaPrompt, entries);
   const rawOutput = await callGemini(prompt);
   const insight = parseInsight(rawOutput);
 
-  console.log("\n── Gemini output ─────────────────────────────────────────");
   console.log(`Headline:     ${insight.headline}`);
   console.log(`Weekly read:  ${insight.weeklyRead}`);
   console.log(`Priorities:`);
   insight.priorities.forEach((p, i) => console.log(`  ${i + 1}. ${p}`));
   console.log(`Today action: ${insight.todayAction}`);
   console.log(`Workout:      ${insight.workoutFocus}`);
-  console.log("──────────────────────────────────────────────────────────\n");
 
   if (dryRun) {
-    console.log("✅ [dry-run] Preview complete — no database write.");
+    console.log("[dry-run] No DB write.");
     return;
   }
 
-  await writeInsight(db, targetEmail, insight, entries.length);
-  console.log(`✅ HealthInsight written to DB for ${targetEmail}.`);
-  console.log("Refresh /dashboard/health to see the coaching card.");
+  await writeInsight(db, email, insight, entries.length);
+  console.log(`✅ HealthInsight saved.`);
+}
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+
+async function main() {
+  const db = createDbClient();
+
+  if (runAll) {
+    const emails = Object.keys(PERSONA_MAP);
+    console.log(`\nGenerating health coaching for all ${emails.length} users…`);
+    if (dryRun) console.log("[dry-run mode — no DB writes]\n");
+
+    const results = { ok: [], failed: [] };
+
+    for (const email of emails) {
+      try {
+        await generateForUser(db, email);
+        results.ok.push(email);
+      } catch (err) {
+        console.error(`❌ Failed for ${email}: ${err.message ?? err}`);
+        results.failed.push(email);
+      }
+    }
+
+    console.log("\n══ Summary " + "═".repeat(50));
+    console.log(`✅ Success: ${results.ok.length}/${emails.length}`);
+    results.ok.forEach((e) => console.log(`   • ${e}`));
+    if (results.failed.length > 0) {
+      console.log(`❌ Failed:  ${results.failed.length}/${emails.length}`);
+      results.failed.forEach((e) => console.log(`   • ${e}`));
+      process.exit(1);
+    }
+    return;
+  }
+
+  // Single-user mode
+  console.log(`\nGenerating health coaching for: ${targetEmail}`);
+  if (dryRun) console.log("[dry-run mode — no DB write]");
+
+  await generateForUser(db, targetEmail);
+
+  if (!dryRun) {
+    console.log("\nRefresh /dashboard/health to see the coaching card.");
+  }
 }
 
 main().catch((e) => {
