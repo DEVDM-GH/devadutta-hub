@@ -183,7 +183,7 @@ function CoachingCard({ insight }: { insight: HealthInsight | null }) {
         {/* Today action + workout focus */}
         <div className="grid sm:grid-cols-2 gap-3">
           <div className="bg-slate-800/60 rounded-lg p-4">
-            <p className="text-xs text-emerald-400 font-medium mb-1">Today's one action</p>
+            <p className="text-xs text-emerald-400 font-medium mb-1">Today&apos;s one action</p>
             <p className="text-sm text-slate-300">{insight.todayAction}</p>
           </div>
           <div className="bg-slate-800/60 rounded-lg p-4">
@@ -255,7 +255,6 @@ export default function HealthPage() {
 
   // Derived data
   const sorted = [...entries].sort((a, b) => a.date.localeCompare(b.date));
-  const last7 = sorted.slice(-7);
   const last14Spark = sorted.slice(-14).map((e) => ({
     date: e.date.slice(5),
     weight: e.weightKg,
@@ -301,7 +300,7 @@ export default function HealthPage() {
           onSubmit={saveEntry}
           className="bg-slate-900 border border-pink-500/20 rounded-xl p-6 space-y-4"
         >
-          <p className="text-sm font-semibold text-pink-400">Today's entry</p>
+          <p className="text-sm font-semibold text-pink-400">Today&apos;s entry</p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Date */}
             <div>
@@ -428,7 +427,7 @@ export default function HealthPage() {
           {recentDisplay.length === 0 ? (
             <div className="bg-slate-900 border border-slate-800 border-dashed rounded-xl p-10 text-center">
               <Heart size={32} className="text-slate-700 mx-auto mb-3" />
-              <p className="text-slate-500 text-sm">No entries yet — hit "Log Today" to start.</p>
+              <p className="text-slate-500 text-sm">No entries yet — hit &quot;Log Today&quot; to start.</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -458,7 +457,7 @@ export default function HealthPage() {
                     <Chip label="Workout ✓" color="text-emerald-400 bg-emerald-500/10 border-emerald-500/20" icon={Dumbbell} />
                   )}
                   {entry.notes && (
-                    <span className="text-xs text-slate-500 italic flex-1 truncate min-w-0">"{entry.notes}"</span>
+                    <span className="text-xs text-slate-500 italic flex-1 truncate min-w-0">&quot;{entry.notes}&quot;</span>
                   )}
 
                   <button

@@ -279,7 +279,7 @@ export default function IdeasPage() {
           <Lightbulb size={40} className="text-slate-700 mx-auto mb-4" />
           <p className="text-slate-500 mb-2">No ideas yet.</p>
           <p className="text-slate-600 text-sm">
-            Run the seed script or click "Add Idea" to get started.
+            Run the seed script or click &quot;Add Idea&quot; to get started.
           </p>
         </div>
       ) : (

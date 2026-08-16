@@ -280,13 +280,13 @@ export default function LandingPage() {
                 About <span className="gradient-text">Me</span>
               </h2>
               <p className="text-slate-400 leading-relaxed mb-4">
-                I'm a Senior SDET with 7+ years in fintech and B2B SaaS, where I've gone from writing automation scripts to building AI-powered engineering systems that change how teams debug, release, and scale.
+                I&apos;m a Senior SDET with 7+ years in fintech and B2B SaaS, where I&apos;ve gone from writing automation scripts to building AI-powered engineering systems that change how teams debug, release, and scale.
               </p>
               <p className="text-slate-400 leading-relaxed mb-4">
                 My current obsession is the intersection of quality engineering and AI — specifically using MCPs, Claude, and Cursor to build tools that make entire engineering teams more effective.
               </p>
               <p className="text-slate-400 leading-relaxed">
-                When I'm not at my desk, you'll find me trekking, swimming, cooking new cuisines, or on a badminton court.
+                When I&apos;m not at my desk, you&apos;ll find me trekking, swimming, cooking new cuisines, or on a badminton court.
               </p>
               <div className="flex gap-4 mt-8">
                 <a
@@ -369,7 +369,7 @@ export default function LandingPage() {
           <h2 className="text-3xl font-bold mb-4 text-center">
             Featured <span className="gradient-text">Projects</span>
           </h2>
-          <p className="text-slate-500 text-center mb-12">Things I've built that actually matter.</p>
+          <p className="text-slate-500 text-center mb-12">Things I&apos;ve built that actually matter.</p>
           <div className="grid md:grid-cols-2 gap-6">
             {projects.map((project) => (
               <div
@@ -452,7 +452,7 @@ export default function LandingPage() {
       <section className="py-24 border-t border-slate-800/50">
         <div className="max-w-2xl mx-auto px-6 text-center">
           <h2 className="text-3xl font-bold mb-4">
-            Let's <span className="gradient-text">Connect</span>
+            Let&apos;s <span className="gradient-text">Connect</span>
           </h2>
           <p className="text-slate-400 mb-8">
             Open to AI Engineering, Staff SDET, and Tech Lead roles. Always up for interesting conversations about AI, MCPs, or quality engineering.
