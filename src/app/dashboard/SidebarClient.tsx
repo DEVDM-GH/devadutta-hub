@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigationOverlay } from "@/components/NavigationOverlay";
 import {
   LayoutDashboard,
@@ -148,9 +148,14 @@ export default function SidebarClient({
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
 
-  useEffect(() => {
+  // Close the mobile drawer when the route changes. Adjusting state during
+  // render (React's recommended pattern) instead of in an effect avoids the
+  // extra commit + re-render that setState-in-effect would trigger.
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
     setMobileOpen(false);
-  }, [pathname]);
+  }
 
   return (
     <div className="flex min-h-screen bg-slate-950">

@@ -1,5 +1,6 @@
 import { auth, signIn } from "@/auth";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { Cpu } from "lucide-react";
 
 export default async function LoginPage({
@@ -71,9 +72,9 @@ export default async function LoginPage({
         </div>
 
         <p className="text-center mt-6">
-          <a href="/" className="text-sm text-slate-600 hover:text-slate-400 transition-colors">
+          <Link href="/" className="text-sm text-slate-600 hover:text-slate-400 transition-colors">
             ← Back to public site
-          </a>
+          </Link>
         </p>
       </div>
     </div>
