@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Lightbulb,
   Pin,
@@ -339,6 +339,21 @@ function IdeaCard({
     CATEGORY_COLORS[idea.category] || CATEGORY_COLORS.general;
   const tags = idea.tags ? idea.tags.split(",").map((t) => t.trim()).filter(Boolean) : [];
 
+  const [expanded, setExpanded] = useState(false);
+  const [canExpand, setCanExpand] = useState(false);
+  const contentRef = useRef<HTMLParagraphElement>(null);
+
+  // Only re-measure while collapsed — the clamp's scrollHeight vs clientHeight
+  // gap is what tells us the text actually overflows 4 lines. Skipping this
+  // while expanded avoids the collapsed/expanded heights being equal and
+  // flipping "Show less" back off.
+  useEffect(() => {
+    if (expanded) return;
+    const el = contentRef.current;
+    if (!el) return;
+    setCanExpand(el.scrollHeight > el.clientHeight + 1);
+  }, [idea.content, expanded]);
+
   return (
     <div
       className={cn(
@@ -369,7 +384,26 @@ function IdeaCard({
       </div>
 
       <h3 className="font-semibold text-sm leading-snug">{idea.title}</h3>
-      <p className="text-xs text-slate-400 leading-relaxed flex-1 line-clamp-4">{idea.content}</p>
+      <div className="flex-1">
+        <p
+          ref={contentRef}
+          className={cn(
+            "text-xs text-slate-400 leading-relaxed",
+            !expanded && "line-clamp-4"
+          )}
+        >
+          {idea.content}
+        </p>
+        {canExpand && (
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="text-xs text-cyan-400 hover:text-cyan-300 font-medium mt-1"
+          >
+            {expanded ? "Show less" : "Read more"}
+          </button>
+        )}
+      </div>
 
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
