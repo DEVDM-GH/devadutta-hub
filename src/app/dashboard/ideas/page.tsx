@@ -17,7 +17,10 @@ import {
   Code,
   ArrowUpDown,
   X,
+  Sparkles,
+  Loader2,
 } from "lucide-react";
+import type { GenerateIdeasResponse } from "@/app/api/admin/generate-ideas/route";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/utils";
 
@@ -91,6 +94,11 @@ export default function IdeasPage() {
     tags: "",
   });
   const [saving, setSaving] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [generateMessage, setGenerateMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   useEffect(() => {
     fetchIdeas();
@@ -117,6 +125,31 @@ export default function IdeasPage() {
     if (!confirm("Delete this idea?")) return;
     await fetch(`/api/ideas?id=${id}`, { method: "DELETE" });
     fetchIdeas();
+  }
+
+  async function handleGenerateIdeas() {
+    setGenerating(true);
+    setGenerateMessage(null);
+    try {
+      const res = await fetch("/api/admin/generate-ideas", { method: "POST" });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setGenerateMessage({ type: "error", text: data.error ?? "Failed to generate ideas." });
+        return;
+      }
+
+      const { count } = data as GenerateIdeasResponse;
+      setGenerateMessage({
+        type: "success",
+        text: `Added ${count} new idea${count === 1 ? "" : "s"}.`,
+      });
+      await fetchIdeas();
+    } catch {
+      setGenerateMessage({ type: "error", text: "Network error. Please try again." });
+    } finally {
+      setGenerating(false);
+    }
   }
 
   async function saveIdea(e: React.FormEvent) {
@@ -174,16 +207,50 @@ export default function IdeasPage() {
         </button>
       </div>
 
-      {/* How to generate prompt banner */}
+      {/* Generate ideas banner */}
       <div className="bg-slate-900 border border-purple-500/20 rounded-xl p-4 mb-6 flex items-start gap-3">
         <Lightbulb size={18} className="text-purple-400 mt-0.5 shrink-0" />
-        <div className="text-sm">
-          <span className="font-semibold text-purple-400">Generate ideas with Cursor: </span>
+        <div className="text-sm flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-3 flex-wrap mb-1">
+            <span className="font-semibold text-purple-400">Generate ideas with Gemini</span>
+            <button
+              onClick={handleGenerateIdeas}
+              disabled={generating}
+              className="flex items-center gap-2 bg-purple-500/10 border border-purple-500/30 text-purple-300 hover:bg-purple-500/20 hover:border-purple-500/60 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+            >
+              {generating ? (
+                <>
+                  <Loader2 size={13} className="animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles size={13} />
+                  Generate Ideas
+                </>
+              )}
+            </button>
+          </div>
           <span className="text-slate-400">
-            Open <code className="bg-slate-800 px-1 rounded text-xs">scripts/idea-prompt.md</code> → paste into Cursor chat → save the JSON output to{" "}
-            <code className="bg-slate-800 px-1 rounded text-xs">scripts/ideas-output.json</code> → run{" "}
-            <code className="bg-slate-800 px-1 rounded text-xs">npm run seed-ideas</code> to load them here.
+            Calls Gemini with your profile prompt (
+            <code className="bg-slate-800 px-1 rounded text-xs">scripts/idea-prompt.md</code>) and
+            adds fresh ideas straight into the list below. Needs{" "}
+            <code className="bg-slate-800 px-1 rounded text-xs">GEMINI_API_KEY</code> in{" "}
+            <code className="bg-slate-800 px-1 rounded text-xs">.env.local</code>. No key? Paste
+            the prompt into Cursor chat instead, save the JSON to{" "}
+            <code className="bg-slate-800 px-1 rounded text-xs">scripts/ideas-output.json</code>,
+            then run <code className="bg-slate-800 px-1 rounded text-xs">npm run seed-ideas</code>.
           </span>
+          {generateMessage && (
+            <p
+              className={cn(
+                "mt-2 text-xs font-medium",
+                generateMessage.type === "success" ? "text-emerald-400" : "text-red-400"
+              )}
+            >
+              {generateMessage.text}
+            </p>
+          )}
         </div>
       </div>
 

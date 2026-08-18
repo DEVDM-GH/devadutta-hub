@@ -25,7 +25,7 @@ Status legend: ✅ Done · ⏳ Not started
 | Item | Notes | Status |
 |---|---|---|
 | No edit | Only Add / Pin / Delete exist — no way to fix a typo or update content without deleting and recreating. Biggest functional gap. `PATCH /api/ideas` already accepts arbitrary fields server-side; needs an edit form/mode on the card | ⏳ |
-| No "Generate Ideas" button in the UI | The banner instructs a fully manual copy/paste-into-Cursor workflow, even though `scripts/generate-ideas-gemini.mjs` (Gemini automation) already exists. Health Pulse already has this pattern (`RefreshCoachingPanel.tsx` → `/api/admin/generate-health`) — mirroring it here (`/api/admin/generate-ideas` + a button) would remove the manual steps for admins | ⏳ |
+| **"Generate Ideas" button in the UI** | Banner now has a button that calls Gemini server-side (`/api/admin/generate-ideas`) and inserts fresh ideas directly into the list — no more manual copy/paste-into-Cursor round trip. The manual workflow is still documented in the banner as a fallback for when `GEMINI_API_KEY` isn't configured | ✅ |
 
 ## Polish
 
@@ -51,5 +51,7 @@ Status legend: ✅ Done · ⏳ Not started
 **Sort control:** Added a `sortBy` dropdown (Newest / Oldest / Title A–Z) next to the search box. Sorting is applied client-side to the already-filtered list, before the existing pinned/unpinned split — so pinned ideas still surface first, but the order within each group now follows the chosen sort.
 
 **Clickable tags:** Each `#tag` pill on a card is now a button. Clicking it sets an `activeTag` filter (shown as a dismissible chip in the filter bar) that narrows the grid to ideas carrying that exact tag; clicking the same tag again, or the chip's `×`, clears it. This is a separate filter dimension from the free-text search box (which still substring-matches title/content/tags).
+
+**Generate Ideas button:** Mirrors the Health Pulse `RefreshCoachingPanel` pattern. `src/lib/idea-generation.ts` holds the shared pipeline (load `scripts/idea-prompt.md` → call Gemini via the Interactions API → validate/parse the JSON array → insert each idea as a new `SavedIdea` row, same append-only semantics as `scripts/seed-ideas-core.mjs`). `POST /api/admin/generate-ideas` gates access with `canAccess(email, "ideas")` (same check as the rest of the `/api/ideas` routes) and returns `{ count, completedAt }`. The banner button shows a loading spinner while the request is in flight, an inline success/error message afterward, and refetches the idea list on success so new ideas appear immediately without a page reload. Returns a friendly `500` with the caught error message if `GEMINI_API_KEY` is missing or the Gemini call/JSON parsing fails.
 
 Related docs: [DEVELOPMENT.md](./DEVELOPMENT.md) · [IDEAS_PIPELINE.md](./IDEAS_PIPELINE.md)
