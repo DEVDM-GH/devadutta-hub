@@ -20,6 +20,10 @@ Check while signed in: **`/api/debug/db`** — shows `savedIdeaCount` and whethe
 
 ---
 
+## In-app "Generate Ideas" button
+
+Signed-in admins can skip the CLI entirely: `/dashboard/ideas` has a **Generate Ideas** button in the purple banner. It calls `POST /api/admin/generate-ideas`, which runs the same prompt (`scripts/idea-prompt.md`) through Gemini server-side and inserts the results straight into whichever database the running app is already connected to (local SQLite or Turso — see the table above), no JSON file or `npm run seed-ideas` step needed. It still requires `GEMINI_API_KEY` in `.env.local` (or the deployment's env vars); without it the button shows a friendly error and falls back to the manual Cursor workflow described below.
+
 ## Gemini API key (automated generation)
 
 The **`GOOGLE_CLIENT_ID`** / **`GOOGLE_CLIENT_SECRET`** pair is for **sign-in only**. Idea generation uses a separate **Gemini API key** from [Google AI Studio](https://aistudio.google.com/apikey).
