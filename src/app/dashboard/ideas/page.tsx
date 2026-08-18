@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Lightbulb,
   Pin,
@@ -15,6 +15,8 @@ import {
   Rocket,
   TrendingUp,
   Code,
+  ArrowUpDown,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/utils";
@@ -46,11 +48,41 @@ const CATEGORY_COLORS: Record<string, string> = {
   general: "text-slate-400 bg-slate-500/10 border-slate-500/20",
 };
 
+type SortOption = "newest" | "oldest" | "title";
+
+const SORT_OPTIONS: { label: string; value: SortOption }[] = [
+  { label: "Newest first", value: "newest" },
+  { label: "Oldest first", value: "oldest" },
+  { label: "Title (A–Z)", value: "title" },
+];
+
+function sortIdeas(list: Idea[], sortBy: SortOption): Idea[] {
+  const sorted = [...list];
+  switch (sortBy) {
+    case "oldest":
+      sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      break;
+    case "title":
+      sorted.sort((a, b) => a.title.localeCompare(b.title));
+      break;
+    case "newest":
+    default:
+      sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+  return sorted;
+}
+
+function parseTags(tags: string): string[] {
+  return tags ? tags.split(",").map((t) => t.trim()).filter(Boolean) : [];
+}
+
 export default function IdeasPage() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
+  const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
     category: "career",
@@ -109,11 +141,17 @@ export default function IdeasPage() {
       idea.title.toLowerCase().includes(search.toLowerCase()) ||
       idea.content.toLowerCase().includes(search.toLowerCase()) ||
       idea.tags.toLowerCase().includes(search.toLowerCase());
-    return matchCat && matchSearch;
+    const matchTag = !activeTag || parseTags(idea.tags).includes(activeTag);
+    return matchCat && matchSearch && matchTag;
   });
 
-  const pinned = filtered.filter((i) => i.pinned);
-  const unpinned = filtered.filter((i) => !i.pinned);
+  const sortedFiltered = sortIdeas(filtered, sortBy);
+  const pinned = sortedFiltered.filter((i) => i.pinned);
+  const unpinned = sortedFiltered.filter((i) => !i.pinned);
+
+  function handleTagClick(tag: string) {
+    setActiveTag((current) => (current === tag ? null : tag));
+  }
 
   return (
     <div className="p-8 max-w-5xl">
@@ -241,7 +279,7 @@ export default function IdeasPage() {
       )}
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3 mb-6">
+      <div className={cn("flex flex-wrap items-center gap-3", activeTag ? "mb-3" : "mb-6")}>
         <div className="relative flex-1 min-w-48">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
           <input
@@ -269,7 +307,35 @@ export default function IdeasPage() {
             </button>
           ))}
         </div>
+        <div className="relative">
+          <ArrowUpDown size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortOption)}
+            aria-label="Sort ideas"
+            className="appearance-none bg-slate-900 border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs font-medium text-slate-400 hover:border-slate-600 focus:outline-none focus:border-cyan-500 cursor-pointer"
+          >
+            {SORT_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
+
+      {activeTag && (
+        <div className="flex items-center gap-2 mb-6 text-xs">
+          <span className="text-slate-500">Filtering by tag:</span>
+          <button
+            onClick={() => setActiveTag(null)}
+            className="flex items-center gap-1.5 bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2.5 py-1 rounded-full font-medium hover:bg-cyan-500/20 transition-colors"
+          >
+            #{activeTag}
+            <X size={12} />
+          </button>
+        </div>
+      )}
 
       {/* Ideas List */}
       {loading ? (
@@ -277,10 +343,28 @@ export default function IdeasPage() {
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
           <Lightbulb size={40} className="text-slate-700 mx-auto mb-4" />
-          <p className="text-slate-500 mb-2">No ideas yet.</p>
-          <p className="text-slate-600 text-sm">
-            Run the seed script or click &quot;Add Idea&quot; to get started.
-          </p>
+          {ideas.length === 0 ? (
+            <>
+              <p className="text-slate-500 mb-2">No ideas yet.</p>
+              <p className="text-slate-600 text-sm">
+                Run the seed script or click &quot;Add Idea&quot; to get started.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-slate-500 mb-2">No ideas match your filters.</p>
+              <button
+                onClick={() => {
+                  setSearch("");
+                  setActiveCategory("all");
+                  setActiveTag(null);
+                }}
+                className="text-cyan-400 hover:text-cyan-300 text-sm font-medium"
+              >
+                Clear all filters
+              </button>
+            </>
+          )}
         </div>
       ) : (
         <div className="space-y-6">
@@ -296,6 +380,8 @@ export default function IdeasPage() {
                     idea={idea}
                     onPin={togglePin}
                     onDelete={deleteIdea}
+                    activeTag={activeTag}
+                    onTagClick={handleTagClick}
                   />
                 ))}
               </div>
@@ -315,6 +401,8 @@ export default function IdeasPage() {
                     idea={idea}
                     onPin={togglePin}
                     onDelete={deleteIdea}
+                    activeTag={activeTag}
+                    onTagClick={handleTagClick}
                   />
                 ))}
               </div>
@@ -330,14 +418,33 @@ function IdeaCard({
   idea,
   onPin,
   onDelete,
+  activeTag,
+  onTagClick,
 }: {
   idea: Idea;
   onPin: (i: Idea) => void;
   onDelete: (id: number) => void;
+  activeTag: string | null;
+  onTagClick: (tag: string) => void;
 }) {
   const colorClass =
     CATEGORY_COLORS[idea.category] || CATEGORY_COLORS.general;
-  const tags = idea.tags ? idea.tags.split(",").map((t) => t.trim()).filter(Boolean) : [];
+  const tags = parseTags(idea.tags);
+
+  const [expanded, setExpanded] = useState(false);
+  const [canExpand, setCanExpand] = useState(false);
+  const contentRef = useRef<HTMLParagraphElement>(null);
+
+  // Only re-measure while collapsed — the clamp's scrollHeight vs clientHeight
+  // gap is what tells us the text actually overflows 4 lines. Skipping this
+  // while expanded avoids the collapsed/expanded heights being equal and
+  // flipping "Show less" back off.
+  useEffect(() => {
+    if (expanded) return;
+    const el = contentRef.current;
+    if (!el) return;
+    setCanExpand(el.scrollHeight > el.clientHeight + 1);
+  }, [idea.content, expanded]);
 
   return (
     <div
@@ -369,14 +476,45 @@ function IdeaCard({
       </div>
 
       <h3 className="font-semibold text-sm leading-snug">{idea.title}</h3>
-      <p className="text-xs text-slate-400 leading-relaxed flex-1 line-clamp-4">{idea.content}</p>
+      <div className="flex-1">
+        <p
+          ref={contentRef}
+          className={cn(
+            "text-xs text-slate-400 leading-relaxed",
+            !expanded && "line-clamp-4"
+          )}
+        >
+          {idea.content}
+        </p>
+        {canExpand && (
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="text-xs text-cyan-400 hover:text-cyan-300 font-medium mt-1"
+          >
+            {expanded ? "Show less" : "Read more"}
+          </button>
+        )}
+      </div>
 
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {tags.map((tag) => (
-            <span key={tag} className="text-xs text-slate-500 bg-slate-800 px-2 py-0.5 rounded">
+            <button
+              key={tag}
+              type="button"
+              onClick={() => onTagClick(tag)}
+              aria-pressed={activeTag === tag}
+              title={activeTag === tag ? `Clear "${tag}" filter` : `Filter by "${tag}"`}
+              className={cn(
+                "text-xs px-2 py-0.5 rounded transition-colors",
+                activeTag === tag
+                  ? "text-cyan-400 bg-cyan-500/20 ring-1 ring-cyan-500/40"
+                  : "text-slate-500 bg-slate-800 hover:bg-slate-700 hover:text-slate-300"
+              )}
+            >
               #{tag}
-            </span>
+            </button>
           ))}
         </div>
       )}
